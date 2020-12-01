@@ -1,5 +1,9 @@
 package com.shunf4.xposedbooxtweaknfix;
 
+import android.app.AndroidAppHelper;
+import android.content.ComponentName;
+import android.content.Intent;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -35,13 +39,28 @@ public class ModMain implements IXposedHookLoadPackage {
                 }
 
                 if (targetSte == null) {
-                    XposedBridge.log("xbtnf: before MotionEvent.recycle: " +
+                    /* XposedBridge.log("xbtnf: before MotionEvent.recycle: " +
                             "com.android.quickstep.TouchInteractionService$3.onMotionEvent " +
-                            "not found in stack trace");
+                            "not found in stack trace"); */
                 } else {
+                    XposedBridge.log("xbtnf: before MotionEvent.recycle: " + stackTraceStr);
                     XposedBridge.log("xbtnf: before MotionEvent.recycle: " +
                             "target found. fix!");
                     mhparam.setResult(null);
+                }
+            }
+        });
+
+        XposedHelpers.findAndHookMethod("com.android.quickstep.TouchInteractionService$3", lpparam.classLoader, "onOverviewShown", boolean.class, new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam mhparam) throws Throwable {
+                boolean triggeredFromAltTab = (Boolean) mhparam.args[0];
+                if (triggeredFromAltTab) {
+                    XposedBridge.log("xbtnf: triggered Overview from AltTab. start Overview");
+                    Intent intent = new Intent();
+                    intent.setComponent(new ComponentName("com.android.systemui", "com.android.systemui.recents.OnyxRecentsActivity"));
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                    AndroidAppHelper.currentApplication().startActivity(intent);
                 }
             }
         });
