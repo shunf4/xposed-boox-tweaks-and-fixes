@@ -8,11 +8,13 @@ Only tested on Max3 with ROM 2020-11-04_07_07_3.0_9aed398. Using this module cou
 
 0. Backup all data on your device
 1. Disable App List mode in EdXposed Manager
-2. Tick this module in EdXposed Manager
-3. Create files in `/data/local` with root permission if you want to switch on/off some tweaks;
+2. Install this module
+3. Go to EdXposed Manager - Modules and press "refresh" button (Since BOOX OS does not allow EdXposed Manager to automatically take action after an app is installed/upgraded)
+4. Tick this module in EdXposed Manager
+5. Create files in `/data/local` with root permission if you want to switch on/off some tweaks;
     See below
-4. Reboot
-5. Enjoy
+6. Reboot
+7. Enjoy
 
 ### Features
 
@@ -38,3 +40,4 @@ Also, you are advised to install [SystemUI Tuner Redesigned](https://play.google
 
 - Allow changing the E-Ink optimization configuration for system (whitelisted) apps (Be careful!)
     (Default is enabled; to disable, create the file `/data/local/xbtnf_disable_all_apps_eink_optimizable_tweak`)
+
