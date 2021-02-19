@@ -7,10 +7,10 @@ Only tested on Max3 with ROM 2020-11-04_07_07_3.0_9aed398. Using this module cou
 ### Usage
 
 0. Backup all data on your device
-1. Disable App List mode in EdXposed Manager
+1. Disable App List mode in EdXposed Manager (Maybe it's optional?)
 2. Install this module
-3. Go to EdXposed Manager - Modules and press "refresh" button (Since BOOX OS does not allow EdXposed Manager to automatically take action after an app is installed/upgraded)
-4. Tick this module in EdXposed Manager
+3. Go to EdXposed Manager - Modules and press "refresh" button (since BOOX OS does not allow EdXposed Manager to automatically take action after an app is installed/upgraded; you can enable "EdXposed Manager" module to make this mechanism work again)
+4. Enable this module in EdXposed Manager
 5. Create files in `/data/local` with root permission if you want to switch on/off some tweaks;
     See below
 6. Reboot
@@ -25,9 +25,8 @@ Also, you are advised to install [SystemUI Tuner Redesigned](https://play.google
 - Fix crash when tapping navigation bar buttons after enabling navigation bar  
     (Default is enabled; to disable, create the file `/data/local/xbtnf_disable_navbar_button_fix`)
 
-- Force NavBar to always be the same color (light/white)
-    (Default is enabled (light color); to disable, create the file `/data/local/xbtnf_disable_navbar_color_tweak`.
-    If you want NavBar to always be dark, create the file `/data/local/xbtnf_navbar_dark`.)
+- Fix navigation bar color (make it transparent when in "Notes" app; some minor fixes)  
+    (Default is enabled; to disable, create the file `/data/local/xbtnf_disable_navbar_color_tweak`.)
 
 - Fix the form of NavBar, switching the original ["SwipeUpUI" NavBar](https://www.androidpolice.com/2018/05/14/android-ps-new-overview-app-switcher-part-launcher/) to a normal form with back/home/recent buttons  
     (Default is enabled; to disable, create the file `/data/local/xbtnf_disable_navbar_form_fix`)

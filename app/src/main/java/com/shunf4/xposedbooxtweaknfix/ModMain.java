@@ -1,5 +1,7 @@
 package com.shunf4.xposedbooxtweaknfix;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AndroidAppHelper;
 import android.content.ComponentName;
@@ -7,12 +9,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowInsets;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
+import androidx.core.graphics.ColorUtils;
 
 import java.io.File;
 import java.io.FileReader;
@@ -20,6 +27,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 
 import de.robv.android.xposed.IXposedHookInitPackageResources;
@@ -40,13 +48,14 @@ public class ModMain implements IXposedHookLoadPackage, IXposedHookZygoteInit, I
             new File(FLAGS_DIRECTORY_PREFIX + "disable_alt_tab_overview_tweak").exists();
     private static final boolean shouldDisableNavBarFormFix =
             new File(FLAGS_DIRECTORY_PREFIX + "disable_navbar_form_fix").exists();
-    private static final boolean shouldNavBarBeDark =
-            new File(FLAGS_DIRECTORY_PREFIX + "navbar_dark").exists();
     private static final boolean shouldDisableNavBarColorTweak =
             new File(FLAGS_DIRECTORY_PREFIX + "disable_navbar_color_tweak").exists();
     private static final boolean shouldDisableAllAppsEInkOptimizableTweak =
             new File(FLAGS_DIRECTORY_PREFIX + "disable_all_apps_eink_optimizable_tweak").exists();
 
+    private static void logStackTrace(String prefix) {
+        XposedBridge.log("xbtnf: " + prefix + ": stack: " + Log.getStackTraceString(new Exception()));
+    }
 
     public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
         if (lpparam.packageName.equals("com.android.systemui")) {
@@ -117,22 +126,25 @@ public class ModMain implements IXposedHookLoadPackage, IXposedHookZygoteInit, I
             }
 
             if (!shouldDisableNavBarColorTweak) {
-                // Force NavBar to use dark/light icons
-                XposedHelpers.findAndHookMethod("com.android.systemui.statusbar.phone.LightBarController",
-                        lpparam.classLoader, "isLightNavigationBarMode", int.class, new XC_MethodHook() {
-                            @Override
-                            protected void beforeHookedMethod(MethodHookParam mhparam) throws Throwable {
-                                mhparam.setResult(!shouldNavBarBeDark);
-                            }
-                        });
-
-                XposedHelpers.findAndHookMethod("com.android.systemui.statusbar.phone.LightBarController",
-                        lpparam.classLoader, "isNavigationLight", new XC_MethodHook() {
-                            @Override
-                            protected void beforeHookedMethod(MethodHookParam mhparam) throws Throwable {
-                                mhparam.setResult(!shouldNavBarBeDark);
-                            }
-                        });
+//                // Force NavBar to use dark/light icons
+//                XposedHelpers.findAndHookMethod("com.android.systemui.statusbar.phone.LightBarController",
+//                        lpparam.classLoader, "isLightNavigationBarMode", int.class, new XC_MethodHook() {
+//                            @Override
+//                            protected void afterHookedMethod(MethodHookParam mhparam) throws Throwable {
+//                                XposedBridge.log("xbtnf: this.mHasLightNavigationBar: " + XposedHelpers.getObjectField(mhparam.thisObject, "mHasLightNavigationBar"));
+//                                XposedBridge.log("xbtnf: isLightNavigationBarMode: " + mhparam.getResult());
+//                                // mhparam.setResult(!shouldNavBarBeDark);
+//                            }
+//                        });
+//
+//                XposedHelpers.findAndHookMethod("com.android.systemui.statusbar.phone.LightBarController",
+//                        lpparam.classLoader, "isNavigationLight", new XC_MethodHook() {
+//                            @Override
+//                            protected void afterHookedMethod(MethodHookParam mhparam) throws Throwable {
+//                                XposedBridge.log("xbtnf: isNavigationLight: " + mhparam.getResult());
+//                                // mhparam.setResult(!shouldNavBarBeDark);
+//                            }
+//                        });
             }
         }
 
@@ -179,21 +191,55 @@ public class ModMain implements IXposedHookLoadPackage, IXposedHookZygoteInit, I
         }
     }
 
+    public static int rgbToGray(int color) {
+        return (((Color.red(color) * 19595) + (38469 * Color.green(color))) + (Color.blue(color) * 7472)) >> 16;
+    }
+
+    public static boolean isLightColor(int color) {
+        return rgbToGray(color) > 180;
+    }
+
+    public static int getColorAlpha(int color) {
+        return (color >> 24) & 0xFF;
+    }
+
+    public static boolean isRealLightColor(int color, int systemUiVisibility, int windowFlags) {
+        return rgbToGray(color) > 140 || (getColorAlpha(color) < 100 && (
+                (systemUiVisibility & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
+                        || (windowFlags & WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION) != 0
+        ));
+    }
+
+    @SuppressLint("NewApi")
     @Override
     public void initZygote(StartupParam startupParam) throws Throwable {
         if (!shouldDisableNavBarColorTweak) {
-            // Force NavBar to be light/dark
+            // When NavBar is currently light, make it transparent (to reveal content covered by NavBar in "Note")
             XposedHelpers.findAndHookMethod("com.android.internal.policy.DecorView", null, "calculateNavigationBarColor",
                     new XC_MethodHook() {
                         @Override
                         protected void afterHookedMethod(MethodHookParam mhparam) throws Throwable {
-//                XposedBridge.log("xbtnf: after DecorView.calculateNavigationBarColor: changing return value " +
-//                        mhparam.getResult().toString()
-//                        + " to ..."
-//                );
-                            mhparam.setResult(
-                                    shouldNavBarBeDark ? Color.rgb(0, 0, 0) : Color.rgb(255, 255, 255)
-                            );
+//                            XposedBridge.log(String.format("xbtnf: calculateNavigationBarColor: current package: %s", AndroidAppHelper.currentApplication().getPackageName()));
+//                            XposedBridge.log(String.format("xbtnf: calculateNavigationBarColor: mNavigationBarColor: %08x", (Integer) XposedHelpers.getObjectField(XposedHelpers.getObjectField(mhparam.thisObject, "mWindow"), "mNavigationBarColor")));
+//                            XposedBridge.log(String.format("xbtnf: calculateNavigationBarColor: result: %08x", (Integer) mhparam.getResult()));
+                            int systemUiVisibility = (Integer) XposedHelpers.callMethod(
+                                    mhparam.thisObject,
+                                    "getSystemUiVisibility");
+                            int windowFlags = ((Window) XposedHelpers.getObjectField(mhparam.thisObject, "mWindow")).getAttributes().flags;
+//                            XposedBridge.log(String.format("xbtnf: calculateNavigationBarColor: systemUiVisibility: %08x, windowFlags: %08x", systemUiVisibility, windowFlags));
+                            if (isRealLightColor((Integer) mhparam.getResult(), systemUiVisibility, windowFlags)) {
+                                if (AndroidAppHelper.currentApplication().getPackageName().equals("com.onyx.android.note")) {
+                                    mhparam.setResult(
+                                            Color.TRANSPARENT
+                                    );
+                                }
+//                                XposedBridge.log("xbtnf: isRealLightColor, setSystemUiVisibility!");
+                                XposedHelpers.callMethod(
+                                        mhparam.thisObject,
+                                        "setSystemUiVisibility",
+                                        systemUiVisibility | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                                );
+                            }
                         }
                     });
         }
