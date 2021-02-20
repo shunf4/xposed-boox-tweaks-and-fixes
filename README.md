@@ -25,8 +25,10 @@ Also, you are advised to install [SystemUI Tuner Redesigned](https://play.google
 - Fix crash when tapping navigation bar buttons after enabling navigation bar  
     (Default is enabled; to disable, create the file `/data/local/xbtnf_disable_navbar_button_fix`)
 
-- Fix navigation bar color (make it transparent when in "Notes" app; some minor fixes)  
-    (Default is enabled; to disable, create the file `/data/local/xbtnf_disable_navbar_color_tweak`.)
+- Fix navigation bar color (make it transparent when in "Onyx Note" app; fix NavBar button colors in some apps)
+    (Default is enabled; to disable, create the file `/data/local/xbtnf_disable_navbar_color_tweak`;
+        if you want an always-dark NavBar, create the file `/data/local/xbtnf_navbar_dark`;
+        if you want an always-light NavBar, create the file `/data/local/xbtnf_navbar_light`.)
 
 - Fix the form of NavBar, switching the original ["SwipeUpUI" NavBar](https://www.androidpolice.com/2018/05/14/android-ps-new-overview-app-switcher-part-launcher/) to a normal form with back/home/recent buttons  
     (Default is enabled; to disable, create the file `/data/local/xbtnf_disable_navbar_form_fix`)
