@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="xposedscope" >
+        <item>com.android.systemui</item>
+        <item>com.onyx.kreader</item>
+        <item>com.onyx.floatingbutton</item>
+        <item>android</item>
+    </string-array>
+</resources>

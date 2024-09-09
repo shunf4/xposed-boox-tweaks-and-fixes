@@ -19,6 +19,9 @@
         <meta-data
             android:name="xposedminversion"
             android:value="90" />
+        <meta-data
+            android:name="xposedscope"
+            android:resource="@array/xposedscope"/>
 
     </application>
 
