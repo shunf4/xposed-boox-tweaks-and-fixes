@@ -1,3 +1,6 @@
+> [!WARNING]  
+> **Project Status: Stale.** This project may not work with recent situation, and it is less likely to be updated.
+
 ## XBTNF
 
 Various Fixs and Tweaks to BOOX as a Xposed module.
