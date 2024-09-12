@@ -102,6 +102,30 @@ public class ModMain implements IXposedHookLoadPackage, /* IXposedHookZygoteInit
                     readerRecentsHook(param, "startActivity");
                 }
             });
+
+            XposedHelpers.findAndHookMethod(View.class, "setSystemUiVisibility", int.class, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    param.args[0] = (((Integer) param.args[0]).intValue() & (~View.SYSTEM_UI_FLAG_IMMERSIVE)
+                            & (~View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+                            & (~View.SYSTEM_UI_FLAG_FULLSCREEN)
+                            & (~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+                            & (~View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+                            & (~View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN))
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            ;
+                }
+            });
+
+            XposedHelpers.findAndHookMethod(Window.class, "setFlags", int.class, int.class, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    param.args[0] = (((Integer) param.args[0]).intValue() & (~WindowManager.LayoutParams.FLAG_FULLSCREEN))
+                    ;
+                    param.args[1] = (((Integer) param.args[1]).intValue() & (~WindowManager.LayoutParams.FLAG_FULLSCREEN))
+                    ;
+                }
+            });
         }
 
         if (!shouldDisableAllAppsEInkOptimizableTweak) {
